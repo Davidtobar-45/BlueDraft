@@ -22,7 +22,7 @@ class _PaginaPrincipalState extends State<PaginaPrincipal> {
     return Scaffold(
       backgroundColor: _azulPrincipal,
       appBar: AppBar(
-        title: const Text('ClearNote', 
+        title: const Text('BlueDraft', 
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: _azulPrincipal,
         elevation: 0,
