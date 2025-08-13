@@ -85,12 +85,7 @@ class CustomNoteTile extends StatelessWidget {
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () async {
-                      await FirestoreService().eliminarNota(doc.id);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Nota eliminada')),
-                      );
-                    },
+                    onPressed: () => _mostrarDialogoConfirmacion(context),
                   ),
                 ],
               ),
@@ -98,6 +93,44 @@ class CustomNoteTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _mostrarDialogoConfirmacion(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Confirmar eliminación'),
+          content: const Text('¿Estás seguro de eliminar esta nota?'),
+          actions: [
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+              onPressed: () async {
+                Navigator.of(context).pop(); // Cierra el diálogo primero
+                try {
+                  await FirestoreService().eliminarNota(doc.id);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Nota eliminada')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: ${e.toString()}')),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
