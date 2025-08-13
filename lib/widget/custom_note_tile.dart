@@ -3,9 +3,12 @@ import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/firestore_service.dart';
 import 'custom_note_dialog.dart';
+import '../screens/note_detail_screen.dart';
 
 class CustomNoteTile extends StatelessWidget {
   final DocumentSnapshot<Map<String, dynamic>> doc;
+  final Color _azulPrincipal = const Color(0xFF1E3A8A);
+  final Color _fondoNotas = const Color(0xFFEFF6FF);
 
   const CustomNoteTile({super.key, required this.doc});
 
@@ -19,46 +22,78 @@ class CustomNoteTile extends StatelessWidget {
     final fechaFormateada = fecha != null
         ? DateFormat('dd/MM/yyyy – HH:mm').format(fecha)
         : 'Fecha desconocida';
+    final imagenUrl = data['imagenUrl'];
 
-    return Card(
-      child: ListTile(
-        title: Text(
-          tipo.toUpperCase(),
-          style: const TextStyle(fontWeight: FontWeight.bold),
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => NoteDetailScreen(doc: doc),
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(contenido),
-            const SizedBox(height: 5),
-            Text(
-              fechaFormateada,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ],
+      ),
+      child: Card(
+        color: _fondoNotas,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
+        elevation: 2,
+        child: Column(
           children: [
-            IconButton(
-              icon: const Icon(Icons.edit, color: Colors.green),
-              onPressed: () {
-                CustomNoteDialog.show(
-                  context,
-                  id: doc.id,
-                  contenidoInit: contenido,
-                  tipoInit: tipo,
-                );
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () async {
-                await FirestoreService().eliminarNota(doc.id);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Nota eliminada')),
-                );
-              },
+            if (imagenUrl != null && tipo == 'blog')
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                child: Image.network(
+                  imagenUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: 150,
+                ),
+              ),
+            ListTile(
+              title: Text(
+                tipo.toUpperCase(),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: _azulPrincipal,
+                ),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(contenido),
+                  const SizedBox(height: 5),
+                  Text(
+                    fechaFormateada,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.green),
+                    onPressed: () {
+                      CustomNoteDialog.show(
+                        context,
+                        id: doc.id,
+                        contenidoInit: contenido,
+                        tipoInit: tipo,
+                        imagenUrlInit: imagenUrl,
+                      );
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () async {
+                      await FirestoreService().eliminarNota(doc.id);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Nota eliminada')),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         ),
